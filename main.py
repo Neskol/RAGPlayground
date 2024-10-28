@@ -13,7 +13,12 @@ llm = ChatOpenAI(model="gpt-4o")
 os.environ["LANGSMITH_TRACING_V2"] = "false"
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
-print(llm.invoke("Can you specify how RAG paradigm improves the precision of LLM output?"))
+log=open("result.txt","w+")
+
+question="Can you specify how RAG paradigm improves the precision of LLM output?"
+log.write(f"向GPT4o提问：{question}\n")
+log.write("GPT4o输出：\n")
+log.write(llm.invoke(question).content)
 
 # 以下内容为LangChain官网提供的一个简便RAG实例程序 https://python.langchain.com/v0.1/docs/use_cases/question_answering/quickstart/
 
@@ -30,7 +35,7 @@ docs = loader.load()
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 splits = text_splitter.split_documents(docs)
-vectorstore = Chroma.from_documents(documents=splits, embedding=OpenAIEmbeddings())
+vectorstore = Chroma.from_documents(documents=splits, embedding=OpenAIEmbeddings()) # 向量化
 
 # Retrieve and generate using the relevant snippets of the blog.
 retriever = vectorstore.as_retriever()
@@ -47,6 +52,19 @@ rag_chain = (
         | StrOutputParser()
 )
 
-print(rag_chain.invoke("What is Task Decomposition?"))
+# 对比生成内容差异
+question="What is Task Decomposition?"
+log.write(f"\nRAG Chain与直接询问GPT4o的比较： {question}\n")
+log.write("RAG Chain输出：")
+log.write(rag_chain.invoke(question))
+log.write("\nGPT4o输出：\n")
+log.write(llm.invoke(question).content)
 
-print(rag_chain.invoke("\nWhat is AutoGPT in the context of your knowledge?"))
+# 确认正常运行
+question="What is AutoGPT in the context of your knowledge?"
+log.write(f"\n对于其他问题，RAG Chain与直接询问GPT4o的比较： {question}\n")
+log.write("\nRAG Chain输出：\n")
+log.write(rag_chain.invoke(question))
+log.write("\nGPT4o输出：\n")
+log.write(llm.invoke(question).content)
+log.close()
