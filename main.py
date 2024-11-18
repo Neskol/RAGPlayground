@@ -17,13 +17,13 @@ llm = OllamaLLM(model=model_name)
 os.environ["LANGSMITH_TRACING_V2"] = "false"
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
-log=open("result.md","w+")
+log=open("result.txt","w+")
 
-question="Can you specify how RAG paradigm improves the precision of LLM output?"
+question="请简要介绍一下RAG技术如何增强大语言模型输出准确度。"
 log.write(f"向{model_name}提问：{question}\n")
 log.write(f"{model_name}输出：\n")
 log.write(llm.invoke(question))
-# log.write(llm.invoke(question).content)
+log.write(llm.invoke(question).content)
 
 # 以下内容为LangChain官网提供的一个简便RAG实例程序 https://python.langchain.com/v0.1/docs/use_cases/question_answering/quickstart/
 
@@ -40,7 +40,7 @@ docs = loader.load()
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 splits = text_splitter.split_documents(docs)
-vector_store = Chroma.from_documents(documents=splits, embedding=OllamaEmbeddings(model="mxbai-embed-large")) # 向量化
+vector_store = Chroma.from_documents(documents=splits, embedding=OllamaEmbeddings(model="mxbai-embed-large"), persist_directory='.') # 向量化
 
 # Retrieve and generate using the relevant snippets of the blog.
 retriever = vector_store.as_retriever()
@@ -58,7 +58,7 @@ rag_chain = (
 )
 
 # 对比生成内容差异
-question="What is Task Decomposition?"
+question="任务分解（Task Decomposition）是什么?"
 log.write(f"\nRAG Chain与直接询问{model_name}的比较： {question}\n")
 log.write("RAG Chain输出：")
 log.write(rag_chain.invoke(question))
@@ -67,7 +67,7 @@ log.write(f"\n{model_name}输出：\n")
 log.write(llm.invoke(question))
 
 # 确认正常运行
-question="What is AutoGPT in the context of your knowledge?"
+question="在上下文语境中，AutoGPT是什么意思？"
 log.write(f"\n对于其他问题，RAG Chain与直接询问{model_name}的比较： {question}\n")
 log.write("\nRAG Chain输出：\n")
 log.write(rag_chain.invoke(question))
